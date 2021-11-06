@@ -1,0 +1,6 @@
+numpy==1.19.5
+sklearn==0.23.2
+torch==1.9.1
+tqdm==4.62.3
+transformers==4.5.1
+git+https://github.com/rwightman/pytorch-image-models
