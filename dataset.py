@@ -18,4 +18,8 @@ class WikiDataset(Dataset):
     def __len__(self):
         return len(self.data)
 
+    def convert_image(self, index):
+        bin_image = base64.b64decode(self.data[index]["b64_bytes"])
+        return np.asarray(Image.open(BytesIO(bin_image)).convert("RGB"))
+
     # TODO getitem dunder
