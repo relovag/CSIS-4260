@@ -2,18 +2,22 @@ import base64
 import random
 from io import BytesIO
 
+import albumentations as A
 import numpy as np
 import torch
+from albumentations.pytorch import ToTensorV2
 from PIL import Image
 from torch.utils.data import Dataset
 
+from constants import SETTINGS
+
 
 class WikiDataset(Dataset):
-    def __init__(self, data, max_len, tokenizer, transforms):
+    def __init__(self, data, max_len, tokenizer, transforms=None):
         self.data = data
         self.max_len = max_len
         self.tokenizer = tokenizer
-        self.transforms = transforms
+        self.transforms = transforms if transforms else self.get_transforms()
 
     def __len__(self):
         return len(self.data)
@@ -48,3 +52,29 @@ class WikiDataset(Dataset):
             max_length=self.max_len,
             padding="max_length"
         )
+
+    def get_transforms(self):
+        mean, std, max_pix = [0.485, 0.456, 0.406], [
+            0.229, 0.224, 0.225], 255.0
+        return {
+            "train": A.Compose([
+                A.Resize(SETTINGS['img_size'], SETTINGS['img_size']),
+                A.HorizontalFlip(p=0.5),
+                A.Normalize(
+                    mean=mean,
+                    std=std,
+                    max_pixel_value=max_pix,
+                    p=1.0
+                ),
+                ToTensorV2()], p=1.0),
+
+            "val": A.Compose([
+                A.Resize(SETTINGS['img_size'], SETTINGS['img_size']),
+                A.Normalize(
+                    mean=mean,
+                    std=std,
+                    max_pixel_value=max_pix,
+                    p=1.0
+                ),
+                ToTensorV2()], p=1.)
+        }
