@@ -26,6 +26,7 @@ class ImageEncoder(nn.Module):
 
 class TextEncoder(nn.Module):
     def __init__(self, text_enc, embed_size):
+        super(TextEncoder, self).__init__()
         self.text_enc = transformers.AutoModel.from_pretrained(text_enc)
         self.dropout = nn.Dropout(p=0.2)
         self.fc = nn.Linear(768, embed_size)
