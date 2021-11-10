@@ -13,11 +13,11 @@ from constants import SETTINGS
 
 
 class WikiDataset(Dataset):
-    def __init__(self, data, max_len, tokenizer, transforms=None):
+    def __init__(self, data, max_len, tokenizer, transforms):
         self.data = data
         self.max_len = max_len
         self.tokenizer = tokenizer
-        self.transforms = transforms if transforms else self.get_transforms()
+        self.transforms = transforms
 
     def __len__(self):
         return len(self.data)
@@ -48,15 +48,16 @@ class WikiDataset(Dataset):
     def tokenize(self, cap):
         return self.tokenizer.encode_plus(
             cap,
-            add_special_token=True,
+            add_special_tokens=True,
             max_length=self.max_len,
             padding="max_length"
         )
 
-    def get_transforms(self):
+    @staticmethod
+    def get_transforms(valid=False):
         mean, std, max_pix = [0.485, 0.456, 0.406], [
             0.229, 0.224, 0.225], 255.0
-        return {
+        transforms = {
             "train": A.Compose([
                 A.Resize(SETTINGS['img_size'], SETTINGS['img_size']),
                 A.HorizontalFlip(p=0.5),
@@ -78,3 +79,4 @@ class WikiDataset(Dataset):
                 ),
                 ToTensorV2()], p=1.)
         }
+        return transforms["val"] if valid else transforms["train"]
