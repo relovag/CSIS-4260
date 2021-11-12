@@ -1,14 +1,15 @@
 import copy
 import gc
+import pickle
 from collections import defaultdict
 from time import time
 
 import numpy as np
 import torch
 import torch.nn as nn
-from tqdm import tqdm
 from timm.optim.lamb import Lamb
 from torch.optim.lr_scheduler import CosineAnnealingLR
+from tqdm import tqdm
 
 from constants import SETTINGS
 
@@ -37,7 +38,7 @@ class ModelTrainer:
         cum_loss = 0.0
         dataloader = self.train_loader if not valid else self.val_loader
         prog_bar = tqdm(enumerate(dataloader), total=len(dataloader))
-    
+
         for iteration, data in prog_bar:
             ids = data['ids'].to(self.device, dtype=torch.long)
             mask = data['mask'].to(self.device, dtype=torch.long)
@@ -118,3 +119,31 @@ class ModelTrainer:
     def init_scheduler(self, sched_type='img'):
         return CosineAnnealingLR(self.img_optim if sched_type == 'img' else self.txt_optim,
                                  T_max=SETTINGS["T_max"], eta_min=SETTINGS["eta_min"])
+
+    def create_embedding_space(self):
+        embedding_space = {}
+        prog_bar = tqdm(enumerate(self.train_loader),
+                        total=len(self.train_loader))
+
+        for _, data in prog_bar:
+            ids = data['ids'].to(self.device, dtype=torch.long)
+            mask = data['mask'].to(self.device, dtype=torch.long)
+            txt_embed = self.txt_enc(ids, mask)
+            embedding_space[data['cap']] = txt_embed
+
+        with open('data/embedding_space.pkl', 'wb') as f:
+            pickle.dump(embedding_space, f)
+
+        self.embedding_space = embedding_space
+
+    def predict(self, img):
+        embed = self.img_enc(img)
+        min_dist = np.inf
+        min_cap = None
+        for txt_cap, txt_embed in self.embedding_space.items():
+            dist = np.linalg.norm(embed - txt_embed)
+            if dist < min_dist:
+                min_dist = dist
+                min_cap = txt_cap
+
+        return min_cap
