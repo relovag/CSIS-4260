@@ -32,6 +32,7 @@ class WikiDataset(Dataset):
         img = self.transforms(image=img)["image"]
 
         return {
+            'cap': cap,
             'ids': torch.tensor(ids, dtype=torch.long),
             'mask': torch.tensor(mask, dtype=torch.long),
             'image': img,
