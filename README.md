@@ -71,8 +71,9 @@ The text encoder being used is BERT base. An illustration of the encoder is show
 
 
 <p align="center">
-<img src="assets/bert.png" width="500" height="300" />
+<img src="assets/bert_arch.png" width="500" height="300" />
 </p>
+<p align="center"><a href="https://jalammar.github.io/illustrated-bert/">Source</a></p>
 
 In our model, BERT is used as an encoder to map a string to a vector on our embedding space. The output of this encoder is a 768 dimensional vector existing in the embedding space through which we can calculate distance metrics.
 
@@ -81,7 +82,7 @@ In our model, BERT is used as an encoder to map a string to a vector on our embe
 We trained our model on a single p3.xlarge instance with a Tesla V100 GPU and 16GB of memory. Due to size of the entire dataset, we limited our training to a subset of three json.gz files totaling around 1.5GB. We trained for 5 epochs using a cosine embedding loss and a layer-wise adaptive moments based (LAMB) optimizer.
 
 ### Loss
-TODO
+The loss is a cosine embedding loss for minimizing the distance between two related vectors. Measuring cosine similarity differs from Euclidean distance in that cosine similarities do not take vector magnitudes into account. Instead, when looking at
 
 ### Optimizer
 LAMB 
