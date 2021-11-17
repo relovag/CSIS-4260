@@ -90,11 +90,9 @@ In our model, EfficientNet-B0 is used as an encoder to map an image to a vector 
 </br>
 </br>
 
-
 ### BERT
 
 The text encoder being used is BERT base. An illustration of the encoder is shown below.
-
 
 <p align="center">
 <img src="assets/bert_arch.png" width="500" height="300" />
@@ -113,7 +111,7 @@ In our model, BERT is used as an encoder to map a string to a vector on our embe
 
 ## Training
 
-We trained our model on a single p3.xlarge instance with a Tesla V100 GPU and 16GB of memory. Due to size of the entire dataset, we limited our training to a subset of three json.gz files totaling around 1.5GB. We trained for 5 epochs using a cosine embedding loss and a layer-wise adaptive moments based (LAMB) optimizer.
+We trained our model on a single p3.xlarge instance with a Tesla V100 GPU and 16GB of memory. Due to size of the entire dataset, we limited our training to a subset of three json.gz files totaling around 1.5GB. We trained for 5 epochs using a cosine embedding loss and a layer-wise adaptive moments (LAMB) optimizer.
 
 <p align="center">
 <img src="assets/loss.png" width="400" height="400" />
@@ -121,6 +119,7 @@ We trained our model on a single p3.xlarge instance with a Tesla V100 GPU and 16
 <p align="center">Training run</p>
 
 ### Loss
+
 The loss is a cosine embedding loss for minimizing the distance between two related vectors. Measuring cosine similarity differs from Euclidean distance in that cosine similarities do not take vector magnitudes into account. Instead, when looking at
 
 <p align="center">
@@ -129,14 +128,25 @@ The loss is a cosine embedding loss for minimizing the distance between two rela
 <p align="center">Cosine embedding loss</p>
 
 ### Optimizer
-LAMB 
 
+The optimizer used to update model weights is the Layer-wise Adaptive Moments optimizer for Batch training (LAMB). To understand LAMB, we will look at traditional optimizers like SGD and the disadvantages they have when training on large batch sizes. With SGD, all model weights are updated using a learning rate &lambda; through a weight update formula that looks like wi + 1 = wi - &lambda;i * &Delta;L(wi). When &lambda; becomes too large, the update can become larger than the norm of the current weight, causing the training process to diverge.
+
+Based on an analysis of weight to gradient norm ratios for large batch sizes, it is observed that these ratios can become very small resulting in training divergence. This divergence has a smaller effect on small batch sizes but necessitates different learning rates for each layer when training on large batch sizes.
+
+<p align="center">
+<img src="assets/layer_problem.png" width="900" height="400" />
+</p>
+<p align="center"><a href="https://openreview.net/forum?id=Syx4wnEtvH">Weight to gradient norm ratios across layers</a></p>
+
+The Layer-wise Adaptive Rate Scaling (LARS) optimizer extends SGD by determining a learning rate per layer. This is done by normalizing the gradients by L2 gradient norm and scaling normalized gradients by the L2 weight norm, effectively decoupling the magnitude of the update from the magnitude of the gradient. The weight to gradient norm ratio for each layer is called the trust ratio in the original paper.
+
+LAMB extends LARS by making a few changes. First, the denominator of the trust ratio is changed from |&Delta;L| + &Beta; |w| to 
+|&Delta;L + &Beta; w|. Next, instead of using the SGD update rule discussed above, the Adam update rule is used instead where a moving average across gradients is computed. Lastly, the trust ratio is clipped to a maximum value of 10. The full pseudocode for the optimizer is shown below.
 
 <p align="center">
 <img src="assets/lamb.png" width="400" height="400" />
 </p>
 <p align="center">Pseudocode for LAMB optimizer</p>
-
 
 ## Results
 TODO
@@ -170,6 +180,8 @@ TODO
 - Jia, Chao, et al. “Scaling Up Visual and Vision-Language Representation Learning With Noisy Text Supervision.” ArXiv:2102.05918 [Cs], June 2021. arXiv.org, http://arxiv.org/abs/2102.05918.
 
 - Zagoruyko, Sergey, and Nikos Komodakis. “Wide Residual Networks.” ArXiv:1605.07146 [Cs], June 2017. arXiv.org, http://arxiv.org/abs/1605.07146.
+
+- Kingma, Diederik P., and Jimmy Ba. “Adam: A Method for Stochastic Optimization.” ArXiv:1412.6980 [Cs], Jan. 2017. arXiv.org, http://arxiv.org/abs/1412.6980.
 
 - Bay, Alessandro, and Biswa Sengupta. “StackSeq2Seq: Dual Encoder Seq2Seq Recurrent Networks.” ArXiv:1710.04211 [Cs, Stat], Jan. 2018. arXiv.org, http://arxiv.org/abs/1710.04211.
 
