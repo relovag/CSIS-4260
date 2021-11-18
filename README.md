@@ -120,12 +120,12 @@ We trained our model on a single p3.xlarge instance with a Tesla V100 GPU and 16
 
 ### Loss
 
-The loss is a cosine embedding loss for minimizing the distance between two related vectors. Measuring cosine similarity differs from Euclidean distance in that cosine similarities do not take vector magnitudes into account. Instead, when looking at
+The loss is a cosine embedding loss for minimizing the distance between two related vectors. Measuring cosine similarity differs from Euclidean (L2) distance in that cosine similarities do not take vector magnitudes into account. Instead, the cosine embedding loss attempts to maximize the cosine distance between negative samples and minimize the cosine distance between positive samples.
 
 <p align="center">
-<img src="assets/cos_embed_loss.png" width="700" height="100" />
+<img src="assets/cosine_embedding.png" width="600" height="300" />
 </p>
-<p align="center">Cosine embedding loss</p>
+<p align="center"><a href="https://www.researchgate.net/publication/316736728_Deep_Speaker_an_End-to-End_Neural_Speaker_Embedding_System">Cosine embedding loss illustrated</a></p>
 
 ### Optimizer
 
@@ -149,7 +149,6 @@ LAMB extends LARS by making a few changes. First, the denominator of the trust r
 <p align="center">Pseudocode for LAMB optimizer</p>
 
 ## Results
-TODO
 
 
 ## References
@@ -170,6 +169,8 @@ TODO
 - Parekh, Zarana, et al. “Crisscrossed Captions: Extended Intramodal and Intermodal Semantic Similarity Judgments for MS-COCO.” Proceedings of the 16th Conference of the European Chapter of the Association for Computational Linguistics: Main Volume, Association for Computational Linguistics, 2021, pp. 2855–70. ACLWeb, https://aclanthology.org/2021.eacl-main.249.
 
 - Devlin, Jacob, et al. “BERT: Pre-Training of Deep Bidirectional Transformers for Language Understanding.” ArXiv:1810.04805 [Cs], May 2019. arXiv.org, http://arxiv.org/abs/1810.04805.
+
+- Li, Chao & Ma, Xiaokong & Jiang, Bing & Li, Xiangang & Zhang, Xuewei & Liu, Xiao & Cao, Ying & Kannan, Ajay & Zhu, Zhenyao. (2017). Deep Speaker: an End-to-End Neural Speaker Embedding System. 
 
 - You, Yang, et al. Large Batch Optimization for Deep Learning: Training BERT in 76 Minutes. 2019. openreview.net, https://openreview.net/forum?id=Syx4wnEtvH.
 
